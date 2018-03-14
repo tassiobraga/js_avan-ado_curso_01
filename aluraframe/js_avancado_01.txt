@@ -1,0 +1,113 @@
+04 - Helper
+
+Um helper é uma classe JS que auxilia o controller em uma função específica. Um helper isola a responsabilidade de processar
+dados e variáveis, tornando o controller menos verboso e mais organizado. Vejamos no código:
+
+let data = new Date(...
+    this._inputData.value
+    .split('-')
+    .map((item, indice) => item - indice % 2)
+);
+
+let negociacao = new Negociacao(
+    data,
+    this._inputQuantidade.value,
+    this._inputValor.value
+);
+
+let diaMesAno = negociacao.data.getDate()
+    + '/' + (negociacao.data.getMonth() + 1)
+    + '/' + negociacao.data.getFullYear();
+
+console.log(diaMesAno);
+
+Essa aplicação tem por objetivo criar um objeto Date() a partir de uma string e em seguida retornar uma string a partir deste
+objeto Date(). Porém toda a aplicação está no mesmo arquivo de uma forma corrida, veja que tudo está muito confuso e as
+variáveis estão soltas no código. Vamos alocar este código no helper DateHelper.js, vejamos o código a seguir:
+
+class DateHelper {
+    dataParaTexto(data) {
+            return data.getDate()
+            + '/' + (data.getMonth() + 1)
+            + '/' + data.getFullYear()
+        }
+    textoParaData(texto) {
+        return new Date(...texto.split('-').map((item, indice) => item - indice % 2));
+    }
+    
+Podemos observar que agora a classe está bem organizada e cada método está bem segmentado. Existe um método que transforma
+data para texto a partir de um objeto Date() e um que converte a string em um objeto Date(). Para alocarmos este código no
+nosso controller podemos fazer da seguinte forma:
+
+let helper = new DateHelper();
+
+        let negociacao = new Negociacao(
+            helper.textoParaData(this._inputData.value),
+            this._inputQuantidade.value,
+            this._inputValor.value
+        );
+        
+        console.log(negociacao);
+        console.log(helper.dataParaTexto(negociacao.data));
+
+Note que o código ficou bem mais enxuto e os métodos deixaram o entendimento da aplicação mais claro.
+
+Métodos estáticos: Observe que nosso helper não tem um constructor declarado e não tem nenhuma propriedade, mas ainda assim
+precisamos instanciá-lo para chamá-lo no código com a linha de código new DateHelper. Se o método não pussui propriedade não é
+necessário uma instância apenas para ele, em contrapartida poderíamos chamá-lo diretamente como uma definição de classe. Para
+isso vamos transformar os métodos da classe DateHelper em estáticos da seguinte forma:
+
+lass DateHelper {
+
+    constructor() {
+        throw new Error('Esta classe não pode ser instanciada');
+    }
+    static dataParaTexto(data) {
+            return data.getDate()
+            + '/' + (data.getMonth() + 1)
+            + '/' + data.getFullYear()
+        }
+    static textoParaData(texto) {
+        return new Date(...texto.split('-').map((item, indice) => item - indice % 2));
+    }
+    
+}
+
+Adicionamos o comando static para dizer que nossos métodos agora podem ser chamados sem a necessidade de instância e de quebra
+adicionamos um construtor de erro que retorna uma mensagem no console caso alguém tente fazer este procedimento. Agora podemos
+chamar os métodos como queríamos, da seguinte forma:
+
+let negociacao = new Negociacao(
+            DateHelper.textoParaData(this._inputData.value),
+            this._inputQuantidade.value,
+            this._inputValor.value
+        );
+        
+        console.log(negociacao);
+        console.log(DateHelper.dataParaTexto(negociacao.data));
+
+Usando o trecho de código DateHelper.textoParaDate() chamamos o método como uma definição de classe, isso só é possível pois
+este método é estático e não tem propriedades, caso contrário sua classe deverá ser instanciada como qualquer outra para que
+ele possa ser chamado no código.
+
+Template strings: Apesar de não estar diretamente relacionada com o helper a função de template string. nova no ES6, merece
+ser mencionada. Agora podemos concatenar strings e variáveis de uma maneira mais fluida, veja o código abaixo:
+
+dataParaTexto(data) {
+
+        return data.getDate()
+            + '/' + (data.getMonth() + 1)
+            + '/' + data.getFullYear();
+      }
+
+Temos o nosso código antigo do método usado no helper, vejamos agora como ele ficaria no modelo de template string:
+
+static dataParaTexto(data) {
+
+            return `${data.getDate()}/${data.getMonth()+1}/${data.getFullYear()}`;
+        }
+
+Perceba que todas as variáveis são inseridas em um bloco de ${} enquanto as strings ficam de fora e são automaticamente
+concatenadas. É importante dizer que toda sintaxe deve ficar entre crases, ´mais exatamente neste formato´.
+
+Criando um repositório
