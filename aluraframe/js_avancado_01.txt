@@ -109,5 +109,3 @@ static dataParaTexto(data) {
 
 Perceba que todas as variáveis são inseridas em um bloco de ${} enquanto as strings ficam de fora e são automaticamente
 concatenadas. É importante dizer que toda sintaxe deve ficar entre crases, ´mais exatamente neste formato´.
-
-Criando um repositório
