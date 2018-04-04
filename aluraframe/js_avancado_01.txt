@@ -109,3 +109,129 @@ static dataParaTexto(data) {
 
 Perceba que todas as variáveis são inseridas em um bloco de ${} enquanto as strings ficam de fora e são automaticamente
 concatenadas. É importante dizer que toda sintaxe deve ficar entre crases, ´mais exatamente neste formato´.
+
+05 - VIEW
+
+Já temos os models, os controllers e os helpers da nossa aplicação, agora precisamos criar um view para que os elementos
+sejam renderizados em tela. Um view nada mais é do que uma classe que renderiza código HTML via Javascript através de
+uma instância chamada em um elemento do DOM, para isso usaremos alguns recursos do ES6. Primeiro criamos um arquivo JS
+para conter nosso código de view, dentro dele inserimos uma classe com uma função para imprimir uma template string, como
+no código abaixo:
+
+class NegociacaoView {
+	template(){
+		return `
+			*CÓDIGO HTML*
+		`;
+	}
+}
+
+A template string possibilita que coloquemos um código HTML puro, como se estivéssemos escravendo no próprio documento. Em
+seguida chamaremos o arquivo no index.html e adicionamos nosso código no controller, da seguinte forma:
+
+constructor() {
+...
+	this._negociacoesView = new NegociacoesView();
+...
+}
+
+Desta forma chamamos a aplicação no controller sempre que a classe principal for instanciada. Agora precisamos indicar no HTML
+qual o ponto onde nossa view será renderizada, para isso usamos uma tag qualquer (pode ser uma div).
+
+<div id="negociacoesView"></div>
+
+Uma vez que já temos um ponto para receber o código precisamos informar qual elemento do DOM receberá nossa view, para isso
+adicionamos um constructor à nossa classe view, da segunte forma:
+
+class NegociacaoView {
+
+	constructor(elemento){
+		this._elemento = elemento;
+	}
+	template(){
+		return `
+			*CÓDIGO HTML*
+		`;
+	}
+}
+
+Agora buscamos o elemento do DOM na classe view que está no controller e adicionamos um método update para escrever o código
+da classe view:
+
+
+constructor() {
+...
+	this._negociacoesView = new NegociacoesView($('#negociacoesView'));
+
+	this._negociacoesView.update();
+...
+}
+
+Por fim criamos o método update na classe view para dar o retorno da função template:
+
+   update() {
+
+        this._elemento.innerHTML = this._template();
+    }
+
+Esse método utiliza o recurso innerHTML, que transforma strings em código possibilitando a iumpressão do código HTML via JS
+sem maiores problemas.
+
+Fundindo view e model: Agora que temos um método view completo vamos adicionar ados dinamicidade através do model. Passando os
+elementos do model para o view podemos injetar código HTML dinamicamente, para isso precisamos vincular o método update ao
+model, vamos começar passando o model comom parâmetro no controller para o update:
+
+this._negociacoesView.update(this._listaNegociacoes);
+
+Lembrando de chamar esse método não só no constructor, quando a página for carregada, mas em todo método que atualize a lista
+do model. Em seguida passamos o model como marametro para o metodo updae e para o template:
+
+ update(model) {
+
+        this._elemento.innerHTML = this._template(model);
+ }
+...
+_template(model){
+...
+
+Agora que o nosso template recebe os dados do model vamos adicionar expressões no corpo da tabela para que os dados do model
+sejam impressos no view:
+
+<tbody>
+    ${model.negociacoes.map(n => {
+        console.log(n);
+        return n;
+      })}
+</tbody>
+
+Utilizamos o map com a arrow function para injetar o código passado pelo model e nomeamos a variável "n", com o return n seria
+gerada uma nova lista, porém o código acima não adiciona nenhuma mudança. Vamos inserir agora os dados dentro das tr da 
+seguinte forma:
+
+<tbody>
+    ${model.negociacoes.map(n => {
+
+      return `
+        <tr>
+            <td>${DateHelper.dataParaTexto(n.data)}</td>
+            <td>${n.quantidade}</td>
+            <td>${n.valor}</td>
+            <td>${n.volume}</td>
+        </tr>
+      `
+      }).join('')}
+</tbody>
+
+Inserimos uma template string como retorno e dentro desta template string inserimos expressões que injetam os dados dentro 
+das tags tr na tabela. Desta forma sempre que a página for carregada ou sempre que a lista for atualizada o método template
+vai inserir código HTML na página de acordo com o model que foi passado a ele.
+Agora vamos aprender mais um recurso muito útil em view para o ES6. Digamos que queiramos calcular um valor que se acumula 
+a cada interação, como um volume total. Para resolver esta questão podemos usar a função reduce, que é um modelo reduzido de
+uma função auto evocativa, ou seja, uma função que é estruturada e é invocada logo em seguida. Veja a sintaxe:
+
+ model.negociacoes.reduce((total, n) => total + n.volume, 0.0)
+
+Utilizamos a função reduce com dois parâmetros: o valor inicial (0.0) e uma função com uma variável "total" e com o
+parâmetro "n" herdado da outra função anterior. Usando a arrow function podemos definir a soma do total com o n.volume
+sempre que algum volume existir, dessa forma esse volume será somado e guardado no valor da variável total. O 0.0 é o valor
+inicial da sentença.
