@@ -235,3 +235,69 @@ Utilizamos a função reduce com dois parâmetros: o valor inicial (0.0) e uma funç
 parâmetro "n" herdado da outra função anterior. Usando a arrow function podemos definir a soma do total com o n.volume
 sempre que algum volume existir, dessa forma esse volume será somado e guardado no valor da variável total. O 0.0 é o valor
 inicial da sentença.
+
+06 - Generalizando a solução da view:
+
+Para começar vamos abordar duas funcionalidades do ES6. A primeira é a possibilidade de decalrar um método set no código,
+essa função tem por objetivo atribuir valor a alguma variável, como no exemplo:
+
+set texto(texto) {
+	this._texto = texto;
+}
+
+Dessa forma quando chamarmos a função texto atriuiremos aquela mensagem àquele texto ao qual aquela mensagem é atribuída.
+Porém, se chamarmos esta função sem nenhum parâmetro com qual valor ela será atribiuída? O ES6 também possibilia que ao
+definir que uma função receberá um parâmetro esse parâmetro seja atribuído de um valor inicial padrão. Veja na sintaxe:
+
+set texto(texto='valor inicial')
+
+Desta forma se a função for instanciada mas não receber nenhum parâmetro para texto o padrão inicial será o valor inserido
+no parâmetro de acordo com a sintaxe acima.
+
+Herança entre classes: O ES6 nos dá a possibilidade de herdarmos métodos de classes agora. Para isso vejamos o exemplo:
+
+class ViewFilha {
+	constructor(elemento){
+	this._elemento = elemento;
+}
+	update(model){
+		this._elemento.innerHTML = this._metodo(model)
+}
+}
+
+Na função acima temos um constructor e um método update, porém o que aconteceria se diversas outras funções também tivessem
+estes mesmos elementos em seus escopos? Seriam todos reescritos? Podemos criar uma função pai que replica elementos que
+aparecem em outras funções com o ES6, veja o exemplo novamente:
+
+class View {
+	constructor(elemento){
+		this._elemento = elemento;
+	}
+	update(model){
+		this._elemento.innerHTML = this._metodo(model);
+	}
+}
+
+class ViewFilha extends View{
+	constructor(elemento){
+		super(elemento);
+	}
+}
+
+Com a declaração abaixo a classe filha herda todos os métodos da classe pai, se rodarmos o código com essa sintaxe ele 
+funcionará corretamente. Porém para a o método constructor é necessário criar uma chamada própria com o parâmetro
+super(elemento), para que a classe não fique sem nenhum construtor. Outro fator interessante do recurso de herança é que
+um mesmo método que está na função pai será sobreescrito se for novamente adicionado na função filha. Ainda podemos usar o
+parâmetro super para complementarmos o método caso este tenha particularidades extras que a função pai não contempla. Para
+isso teremos que invocar a super primeiro, veja o código:
+
+class ViewFilha {
+	constructor(elemento){
+		super(elemento);
+		*outras instruções da função*
+	}
+}
+
+Dessa forma herda-se os parâmetros do pais e sobrescreve-se o restante como complemento.
+Por fim é importante saber que a classe pai sempre tem que ser chamada antes das filhas no HTML caso contrário um erro de
+identificação occorerá e o código não funciona.
